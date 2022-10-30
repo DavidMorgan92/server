@@ -1,7 +1,7 @@
 import { NextFunction, Response, Request } from 'express';
+import { ZodError } from 'zod';
 import HttpException from '../exceptions/http-exception';
 import RateLimitException from '../exceptions/rate-limit-exception';
-import ValidationException from '../exceptions/validation-exception';
 
 /**
  * Custom error handler
@@ -14,10 +14,10 @@ export default function errorHandler(
 	res: Response,
 	_next: NextFunction,
 ): void {
-	// If it is a ValidationError
-	if (error instanceof ValidationException) {
+	// If it is a ZodError
+	if (error instanceof ZodError) {
 		// Respond with 400 and list of errors
-		res.status(400).json({ errors: error.errors });
+		res.status(400).json(error.format());
 		return;
 	}
 

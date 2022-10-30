@@ -1,9 +1,19 @@
 import express from 'express';
+import { default as asyncHandler } from 'express-async-handler';
+import LoginSchema from './schemas/login-schema';
+import * as authService from '../../services/auth-service';
 
 const auth = express.Router();
 
 /** Get access and refresh tokens with login credentials */
-auth.post('/login', (_req, _res) => {});
+auth.post(
+	'/login',
+	asyncHandler(async (req, res) => {
+		const data = LoginSchema.parse(req.body);
+		const result = await authService.login(data.username, data.password);
+		res.json(result);
+	}),
+);
 
 /** Get new access and refresh tokens with a refresh token */
 auth.post('/token', (_req, _res) => {});
