@@ -1,6 +1,6 @@
 import express from 'express';
 import { default as asyncHandler } from 'express-async-handler';
-import LoginSchema from './schemas/login-schema';
+import * as schemas from './schemas';
 import * as authService from '../../services/auth-service';
 
 const auth = express.Router();
@@ -9,8 +9,8 @@ const auth = express.Router();
 auth.post(
 	'/login',
 	asyncHandler(async (req, res) => {
-		const data = LoginSchema.parse(req.body);
-		const result = await authService.login(data.username, data.password);
+		const data = schemas.login.parse(req.body);
+		const result = await authService.login(data.email, data.password);
 		res.json(result);
 	}),
 );
@@ -19,7 +19,18 @@ auth.post(
 auth.post('/token', (_req, _res) => {});
 
 /** Register a new account */
-auth.post('/register', (_req, _res) => {});
+auth.post(
+	'/register',
+	asyncHandler(async (req, res) => {
+		const data = schemas.register.parse(req.body);
+		const result = await authService.register(
+			data.email,
+			data.password,
+			data.email,
+		);
+		res.json(result);
+	}),
+);
 
 /** Delete an account */
 auth.post('/delete', (_req, _res) => {});

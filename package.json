@@ -7,7 +7,7 @@
 		"start": "npm run build && node dist/index.js",
 		"watch": "ts-node-dev src/index.ts",
 		"build": "tsc",
-		"test": "jest",
+		"test": "jest --watch",
 		"prettier": "prettier --write **/*"
 	},
 	"author": "David Morgan",
@@ -30,7 +30,6 @@
 		"dotenv": "^16.0.3",
 		"express": "^4.18.2",
 		"express-async-handler": "^1.2.0",
-		"express-zod-api": "^8.3.3",
 		"helmet": "^6.0.0",
 		"morgan": "^1.10.0",
 		"zod": "^3.19.1"

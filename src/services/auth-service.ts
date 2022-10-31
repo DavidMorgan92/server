@@ -10,3 +10,7 @@ export async function login(_username: string, _password: string) {
 		},
 	};
 }
+
+export async function register(_username: string, _password: string, email: string) {
+	return true;
+}
