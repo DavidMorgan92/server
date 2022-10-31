@@ -33,6 +33,16 @@ export async function login(
 	};
 }
 
+export async function loginWithRefreshToken(
+	_email: string,
+	_refreshToken: string,
+): Promise<TokenPair> {
+	return {
+		accessToken: { token: 'asdf', expiresAt: new Date() },
+		refreshToken: { token: 'asdf', expiresAt: new Date() },
+	};
+}
+
 export async function register(
 	_email: string,
 	_password: string,

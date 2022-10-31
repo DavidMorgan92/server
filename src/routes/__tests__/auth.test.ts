@@ -65,50 +65,6 @@ describe('/auth', () => {
 				});
 			});
 
-			it('responds with 400 if email is not a valid email', async () => {
-				const data = { email: 'invalid.email', password: 'pass' };
-
-				const res = await request(app).post('/auth/login').send(data);
-
-				expect(res.status).toBe(400);
-				expect(res.body).toEqual({
-					_errors: [],
-					email: { _errors: ['Invalid email'] },
-				});
-			});
-
-			it('responds with 400 if email is under 1 character', async () => {
-				const data = { email: '', password: 'pass' };
-
-				const res = await request(app).post('/auth/login').send(data);
-
-				expect(res.status).toBe(400);
-				expect(res.body).toEqual({
-					_errors: [],
-					email: {
-						_errors: [
-							'Invalid email',
-							'String must contain at least 1 character(s)',
-						],
-					},
-				});
-			});
-
-			it('responds with 400 if email is over 100 characters', async () => {
-				const data = {
-					email: 'valid@' + new Array(91).fill('a').join('') + '.com',
-					password: 'pass',
-				};
-
-				const res = await request(app).post('/auth/login').send(data);
-
-				expect(res.status).toBe(400);
-				expect(res.body).toEqual({
-					_errors: [],
-					email: { _errors: ['String must contain at most 100 character(s)'] },
-				});
-			});
-
 			it('responds with 400 if password is not given', async () => {
 				const data = { email: 'valid@email.com' };
 
@@ -120,35 +76,117 @@ describe('/auth', () => {
 					password: { _errors: ['Required'] },
 				});
 			});
+		});
+	});
 
-			it('responds with 400 if password is under 1 character', async () => {
-				const data = { email: 'valid@email.com', password: '' };
+	describe('/token', () => {
+		describe('POST', () => {
+			it('responds with 200 with good input', async () => {
+				const data = {
+					email: 'dave@verified.com',
+					refreshToken: 'mock refresh token',
+				};
 
-				const res = await request(app).post('/auth/login').send(data);
+				const res = await request(app).post('/auth/token').send(data);
 
-				expect(res.status).toBe(400);
+				expect(res.status).toBe(200);
 				expect(res.body).toEqual({
-					_errors: [],
-					password: {
-						_errors: ['String must contain at least 1 character(s)'],
+					accessToken: {
+						token: 'mock access token',
+						expiresAt: expect.any(String),
+					},
+					refreshToken: {
+						token: 'mock refresh token',
+						expiresAt: expect.any(String),
 					},
 				});
 			});
 
-			it('responds with 400 if password is over 100 characters', async () => {
+			it('responds with 401 if email is not matched', async () => {
 				const data = {
-					email: 'valid@email.com',
-					password: new Array(101).fill('a').join(''),
+					email: 'user.does.not@exist.com',
+					refreshToken: 'mock refresh token',
 				};
 
-				const res = await request(app).post('/auth/login').send(data);
+				const res = await request(app).post('/auth/token').send(data);
+
+				expect(res.status).toBe(401);
+				expect(res.body).toEqual({
+					message: 'Could not find user with matching email',
+				});
+			});
+
+			it('responds with 401 if user is unverified', async () => {
+				const data = {
+					email: 'dave@unverified.com',
+					refreshToken: 'mock refresh token',
+				};
+
+				const res = await request(app).post('/auth/token').send(data);
+
+				expect(res.status).toBe(401);
+				expect(res.body).toEqual({ message: 'User not verified' });
+			});
+
+			it('responds with 401 if token does not exist in store', async () => {
+				const data = {
+					email: 'dave@verified.com',
+					refreshToken: 'non-existant token',
+				};
+
+				const res = await request(app).post('/auth/token').send(data);
+
+				expect(res.status).toBe(401);
+				expect(res.body).toEqual({ message: 'Invalid refresh token' });
+			});
+
+			it('responds with 401 if token does not belong to the given user', async () => {
+				const data = {
+					email: 'dave@verified.com',
+					refreshToken: 'refresh token for wrong user',
+				};
+
+				const res = await request(app).post('/auth/token').send(data);
+
+				expect(res.status).toBe(401);
+				expect(res.body).toEqual({
+					message: 'Refresh token does not belong to the user',
+				});
+			});
+
+			it('responds with 401 if token is expired', async () => {
+				const data = {
+					email: 'dave@verified.com',
+					refreshToken: 'expired refresh token',
+				};
+
+				const res = await request(app).post('/auth/token').send(data);
+
+				expect(res.status).toBe(401);
+				expect(res.body).toEqual({ message: 'Expired refresh token' });
+			});
+
+			it('responds with 400 if email is not given', async () => {
+				const data = { refreshToken: 'mock refresh token' };
+
+				const res = await request(app).post('/auth/token').send(data);
 
 				expect(res.status).toBe(400);
 				expect(res.body).toEqual({
 					_errors: [],
-					password: {
-						_errors: ['String must contain at most 100 character(s)'],
-					},
+					email: { _errors: ['Required'] },
+				});
+			});
+
+			it('responds with 400 if refresh token is not given', async () => {
+				const data = { email: 'dave@verified.com' };
+
+				const res = await request(app).post('/auth/token').send(data);
+
+				expect(res.status).toBe(400);
+				expect(res.body).toEqual({
+					_errors: [],
+					refreshToken: { _errors: ['Required'] },
 				});
 			});
 		});
@@ -378,6 +416,25 @@ describe('/auth', () => {
 					_errors: [],
 					displayName: {
 						_errors: ['String must contain at most 100 character(s)'],
+					},
+				});
+			});
+
+			it('responds with 400 if displayName is all whitespace', async () => {
+				const data = {
+					email: 'valid@email.com',
+					password: 'pass',
+					confirmPassword: 'pass',
+					displayName: ' \t\r\n',
+				};
+
+				const res = await request(app).post('/auth/register').send(data);
+
+				expect(res.status).toBe(400);
+				expect(res.body).toEqual({
+					_errors: [],
+					displayName: {
+						_errors: ['String must contain at least 1 character(s)'],
 					},
 				});
 			});

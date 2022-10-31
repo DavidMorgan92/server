@@ -16,7 +16,17 @@ auth.post(
 );
 
 /** Get new access and refresh tokens with a refresh token */
-auth.post('/token', (_req, _res) => {});
+auth.post(
+	'/token',
+	asyncHandler(async (req, res) => {
+		const data = schemas.token.parse(req.body);
+		const result = await authService.loginWithRefreshToken(
+			data.email,
+			data.refreshToken,
+		);
+		res.json(result);
+	}),
+);
 
 /** Register a new account */
 auth.post(

@@ -2,7 +2,7 @@ import { VerifiedCallback } from 'passport-jwt';
 import HttpException from '../../exceptions/http-exception';
 import { TokenPair } from '../auth-service';
 
-/** Mock backing store */
+/** Mock backing store for users */
 const users = [
 	{
 		id: 1,
@@ -17,6 +17,28 @@ const users = [
 		password: 'pass',
 		displayName: 'Dave Unverified',
 		verified: false,
+	},
+];
+
+/** Mock backing store for refresh tokens */
+const refreshTokens = [
+	{
+		id: 1,
+		userId: 1,
+		token: 'mock refresh token',
+		expiresAt: new Date(new Date().getTime() + 600000),
+	},
+	{
+		id: 2,
+		userId: 1,
+		token: 'expired refresh token',
+		expiresAt: new Date(new Date().getTime() - 600000),
+	},
+	{
+		id: 3,
+		userId: -1,
+		token: 'refresh token for wrong user',
+		expiresAt: new Date(new Date().getTime() + 600000),
 	},
 ];
 
@@ -41,7 +63,7 @@ export async function login(
 	email: string,
 	password: string,
 ): Promise<TokenPair> {
-	// Find user is backing store
+	// Find user in backing store
 	const user = users.find(u => u.email === email);
 
 	// Throw if email isn't matched
@@ -54,6 +76,57 @@ export async function login(
 	// Throw if password is incorrect
 	if (user.password !== password)
 		throw new HttpException(401, 'Incorrect password');
+
+	// Return access and refresh tokens
+	return {
+		accessToken: {
+			token: 'mock access token',
+			expiresAt: new Date(),
+		},
+		refreshToken: {
+			token: 'mock refresh token',
+			expiresAt: new Date(),
+		},
+	};
+}
+
+/**
+ * Mock loginWithRefreshToken method
+ * @param email User's email
+ * @param refreshToken Refresh token belonging to the user with the given email
+ * @returns Mock access and refresh tokens
+ */
+export async function loginWithRefreshToken(
+	email: string,
+	refreshToken: string,
+): Promise<TokenPair> {
+	// Find user in backing store
+	const user = users.find(u => u.email === email);
+
+	// Throw if email isn't matched
+	if (user === undefined)
+		throw new HttpException(401, 'Could not find user with matching email');
+
+	// Throw if user is unverified
+	if (!user.verified) throw new HttpException(401, 'User not verified');
+
+	// Get token object with matching token string
+	const tokenObj = refreshTokens.find(r => r.token === refreshToken);
+
+	// Throw if refresh token does not exist in the store
+	if (tokenObj === undefined)
+		throw new HttpException(401, 'Invalid refresh token');
+
+	// Throw if refresh token does not belong to the user with the given email
+	if (user.id !== tokenObj.userId)
+		throw new HttpException(401, 'Refresh token does not belong to the user');
+
+	// Throw if refresh token is expired
+	if (tokenObj.expiresAt < new Date())
+		throw new HttpException(401, 'Expired refresh token');
+
+	// Delete the refresh token when it's used
+	refreshTokens.splice(refreshTokens.indexOf(tokenObj), 1);
 
 	// Return access and refresh tokens
 	return {
