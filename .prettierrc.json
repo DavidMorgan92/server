@@ -5,7 +5,7 @@
 	"bracketSameLine": false,
 	"trailingComma": "all",
 	"bracketSpacing": true,
-	"endOfLine": "lf",
+	"endOfLine": "crlf",
 	"htmlWhitespaceSensitivity": "css",
 	"jsxSingleQuote": true,
 	"printWidth": 80,

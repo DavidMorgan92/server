@@ -1,5 +1,9 @@
 {
-	"exclude": ["**/*.test.ts", "**/__mocks__/*"], /* Exclude files just for Jest */
+	/* Exclude files just for Jest */
+	"exclude": [
+		"**/*.test.ts",
+		"**/__mocks__/*"
+	],
 	"compilerOptions": {
 		/* Visit https://aka.ms/tsconfig to read more about this file */
 
