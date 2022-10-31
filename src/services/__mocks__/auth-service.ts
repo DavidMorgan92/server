@@ -1,5 +1,6 @@
 import { VerifiedCallback } from 'passport-jwt';
 import HttpException from '../../exceptions/http-exception';
+import { TokenPair } from '../auth-service';
 
 /** Mock backing store */
 const users = [
@@ -19,10 +20,16 @@ const users = [
 	},
 ];
 
+/** ID for a new user */
+let newUserId = users.length + 1;
+
 /**
  * Mock passport verify method
  */
-export async function verifyJwt(_payload: any, _done: VerifiedCallback) {}
+export async function verifyJwt(
+	_payload: any,
+	_done: VerifiedCallback,
+): Promise<void> {}
 
 /**
  * Mock login method
@@ -30,7 +37,10 @@ export async function verifyJwt(_payload: any, _done: VerifiedCallback) {}
  * @param password User's password
  * @returns Mock access and refresh tokens
  */
-export async function login(email: string, password: string) {
+export async function login(
+	email: string,
+	password: string,
+): Promise<TokenPair> {
 	// Find user is backing store
 	const user = users.find(u => u.email === email);
 
@@ -56,4 +66,32 @@ export async function login(email: string, password: string) {
 			expiresAt: new Date(),
 		},
 	};
+}
+
+/**
+ * Mock register method
+ * @param email User's email
+ * @param password User's password
+ * @param displayName User's display name
+ */
+export async function register(
+	email: string,
+	password: string,
+	displayName: string,
+): Promise<void> {
+	// Check for existing user in backing store
+	const user = users.find(u => u.email === email);
+
+	// Throw if email is taken
+	if (user !== undefined)
+		throw new HttpException(500, 'Email is already registered');
+
+	// Add new user to backing store
+	users.push({
+		id: newUserId++,
+		email,
+		password,
+		displayName,
+		verified: false,
+	});
 }

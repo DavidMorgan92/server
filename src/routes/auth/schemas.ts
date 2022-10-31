@@ -11,7 +11,7 @@ export const register = z
 	.object({
 		email: z.string().trim().email().min(1).max(100),
 		password: z.string().min(1).max(100),
-		confirmPassword: z.string().min(1).max(100),
+		confirmPassword: z.string(),
 		displayName: z.string().trim().min(1).max(100),
 	})
 	.refine(data => data.password === data.confirmPassword, {
