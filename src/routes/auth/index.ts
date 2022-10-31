@@ -26,7 +26,7 @@ auth.post(
 		const result = await authService.register(
 			data.email,
 			data.password,
-			data.email,
+			data.displayName,
 		);
 		res.json(result);
 	}),

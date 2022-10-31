@@ -21,7 +21,7 @@ export default function errorHandler(
 		return;
 	}
 
-	// If it is a RateLimitError
+	// If it is a RateLimitException
 	if (error instanceof RateLimitException) {
 		// Set Retry-After header to number of seconds to wait and respond with 429
 		res.set('Retry-After', String(error.retrySeconds));

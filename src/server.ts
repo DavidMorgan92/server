@@ -2,7 +2,9 @@ import express from 'express';
 import helmet from 'helmet';
 import morgan from 'morgan';
 import cors from 'cors';
+import passport from 'passport';
 import errorHandler from './util/error-handler';
+import configurePassport from './util/configure-passport';
 import auth from './routes/auth';
 
 // Create Express app
@@ -19,6 +21,12 @@ app.use(cors({ origin: process.env.CLIENT_ORIGIN }));
 
 // Use JSON body parser
 app.use(express.json());
+
+// Configure passport
+configurePassport(passport);
+
+// Use Passport
+app.use(passport.initialize());
 
 // Connect routers
 app.use('/auth', auth);

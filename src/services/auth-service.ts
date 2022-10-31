@@ -1,16 +1,11 @@
-export async function login(_username: string, _password: string) {
-	return {
-		accessToken: {
-			token: 'real access token',
-			expiresAt: new Date(),
-		},
-		refreshToken: {
-			token: 'real refresh token',
-			expiresAt: new Date(),
-		},
-	};
-}
+import { VerifiedCallback } from 'passport-jwt';
 
-export async function register(_username: string, _password: string, email: string) {
-	return true;
-}
+export async function verifyJwt(_payload: any, _done: VerifiedCallback) {}
+
+export async function login(_email: string, _password: string) {}
+
+export async function register(
+	_email: string,
+	_password: string,
+	_displayName: string,
+) {}
