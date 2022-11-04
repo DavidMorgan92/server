@@ -5,7 +5,6 @@ describe('register schema', () => {
 		const input = {
 			email: ' \tdave@gmail.com\r\n',
 			password: 'pass',
-			confirmPassword: 'pass',
 			displayName: 'Dave',
 		};
 
@@ -18,7 +17,6 @@ describe('register schema', () => {
 		const input = {
 			email: 'dave@gmail.com',
 			password: 'pass',
-			confirmPassword: 'pass',
 			displayName: ' \tDave\r\n',
 		};
 

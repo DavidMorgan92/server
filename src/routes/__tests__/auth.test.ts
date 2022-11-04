@@ -198,7 +198,6 @@ describe('/auth', () => {
 				const data = {
 					email: 'new@user.com',
 					password: 'pass',
-					confirmPassword: 'pass',
 					displayName: 'New User',
 				};
 
@@ -212,7 +211,6 @@ describe('/auth', () => {
 				const data = {
 					email: 'dave@verified.com',
 					password: 'pass',
-					confirmPassword: 'pass',
 					displayName: 'New User',
 				};
 
@@ -225,7 +223,6 @@ describe('/auth', () => {
 			it('responds with 400 if email is not given', async () => {
 				const data = {
 					password: 'pass',
-					confirmPassword: 'pass',
 					displayName: 'New User',
 				};
 
@@ -242,7 +239,6 @@ describe('/auth', () => {
 				const data = {
 					email: 'invalid.email',
 					password: 'pass',
-					confirmPassword: 'pass',
 					displayName: 'New User',
 				};
 
@@ -259,7 +255,6 @@ describe('/auth', () => {
 				const data = {
 					email: '',
 					password: 'pass',
-					confirmPassword: 'pass',
 					displayName: 'New User',
 				};
 
@@ -281,7 +276,6 @@ describe('/auth', () => {
 				const data = {
 					email: 'valid@' + new Array(91).fill('a').join('') + '.com',
 					password: 'pass',
-					confirmPassword: 'pass',
 					displayName: 'New User',
 				};
 
@@ -297,7 +291,6 @@ describe('/auth', () => {
 			it('responds with 400 if password is not given', async () => {
 				const data = {
 					email: 'valid@email.com',
-					confirmPassword: 'pass',
 					displayName: 'New User',
 				};
 
@@ -314,7 +307,6 @@ describe('/auth', () => {
 				const data = {
 					email: 'valid@email.com',
 					password: '',
-					confirmPassword: '',
 					displayName: 'New User',
 				};
 
@@ -335,7 +327,6 @@ describe('/auth', () => {
 				const data = {
 					email: 'valid@email.com',
 					password: password,
-					confirmPassword: password,
 					displayName: 'New User',
 				};
 
@@ -350,27 +341,10 @@ describe('/auth', () => {
 				});
 			});
 
-			it('responds with 400 if confirmPassword is not given', async () => {
-				const data = {
-					email: 'valid@email.com',
-					password: 'pass',
-					displayName: 'New User',
-				};
-
-				const res = await request(app).post('/auth/register').send(data);
-
-				expect(res.status).toBe(400);
-				expect(res.body).toEqual({
-					_errors: [],
-					confirmPassword: { _errors: ['Required'] },
-				});
-			});
-
 			it('responds with 400 if displayName is not given', async () => {
 				const data = {
 					email: 'valid@email.com',
 					password: 'pass',
-					confirmPassword: 'pass',
 				};
 
 				const res = await request(app).post('/auth/register').send(data);
@@ -386,7 +360,6 @@ describe('/auth', () => {
 				const data = {
 					email: 'valid@email.com',
 					password: 'pass',
-					confirmPassword: 'pass',
 					displayName: '',
 				};
 
@@ -405,7 +378,6 @@ describe('/auth', () => {
 				const data = {
 					email: 'valid@email.com',
 					password: 'pass',
-					confirmPassword: 'pass',
 					displayName: new Array(101).fill('a').join(''),
 				};
 
@@ -424,7 +396,6 @@ describe('/auth', () => {
 				const data = {
 					email: 'valid@email.com',
 					password: 'pass',
-					confirmPassword: 'pass',
 					displayName: ' \t\r\n',
 				};
 

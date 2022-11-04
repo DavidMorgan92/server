@@ -18,10 +18,5 @@ export const register = z
 		email: z.string().trim().email().min(1).max(100),
 		// TODO: Improve password validation
 		password: z.string().min(1).max(100),
-		confirmPassword: z.string(),
 		displayName: z.string().trim().min(1).max(100),
-	})
-	.refine(data => data.password === data.confirmPassword, {
-		message: "Passwords don't match",
-		path: ['confirmPassword'],
 	});
