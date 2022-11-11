@@ -1,3 +1,5 @@
+import { NextFunction, Request, Response } from 'express';
+import passport from 'passport';
 import { VerifiedCallback } from 'passport-jwt';
 import HttpException from '../../exceptions/http-exception';
 import { TokenPair } from '../auth-service';
@@ -5,7 +7,7 @@ import { TokenPair } from '../auth-service';
 /** Mock backing store for users */
 const users = [
 	{
-		id: 1,
+		id: '1',
 		email: 'dave@verified.com',
 		password: 'pass',
 		displayName: 'Dave Verified',
@@ -13,7 +15,7 @@ const users = [
 		deleted: false,
 	},
 	{
-		id: 2,
+		id: '2',
 		email: 'dave@unverified.com',
 		password: 'pass',
 		displayName: 'Dave Unverified',
@@ -26,19 +28,19 @@ const users = [
 const refreshTokens = [
 	{
 		id: 1,
-		userId: 1,
+		userId: '1',
 		token: 'mock refresh token',
 		expiresAt: new Date(new Date().getTime() + 600000),
 	},
 	{
 		id: 2,
-		userId: 1,
+		userId: '1',
 		token: 'expired refresh token',
 		expiresAt: new Date(new Date().getTime() - 600000),
 	},
 	{
 		id: 3,
-		userId: -1,
+		userId: '-1',
 		token: 'refresh token for wrong user',
 		expiresAt: new Date(new Date().getTime() + 600000),
 	},
@@ -55,6 +57,14 @@ export async function verifyJwt(
 	_done: VerifiedCallback,
 ): Promise<void> {}
 
+export function protectedRoute(
+	req: Request,
+	res: Response,
+	next: NextFunction,
+) {
+	return passport.authenticate('mock', { session: false })(req, res, next);
+}
+
 /**
  * Mock login method
  * @param email User's email
@@ -69,11 +79,8 @@ export async function login(
 	const user = users.find(u => u.email === email);
 
 	// Throw if email isn't matched
-	if (user === undefined)
+	if (user === undefined || user.deleted)
 		throw new HttpException(401, 'Could not find user with matching email');
-
-	// Throw if user was deleted
-	if (user.deleted) throw new HttpException(401, 'User deleted');
 
 	// Throw if user is unverified
 	if (!user.verified) throw new HttpException(401, 'User not verified');
@@ -109,7 +116,7 @@ export async function loginWithRefreshToken(
 	const user = users.find(u => u.email === email);
 
 	// Throw if email isn't matched
-	if (user === undefined)
+	if (user === undefined || user.deleted)
 		throw new HttpException(401, 'Could not find user with matching email');
 
 	// Throw if user is unverified
@@ -161,12 +168,12 @@ export async function register(
 	const user = users.find(u => u.email === email);
 
 	// Throw if email is taken
-	if (user !== undefined)
+	if (user !== undefined && !user.deleted)
 		throw new HttpException(500, 'Email is already registered');
 
 	// Add new user to backing store
 	users.push({
-		id: newUserId++,
+		id: String(newUserId++),
 		email,
 		password,
 		displayName,
@@ -175,14 +182,21 @@ export async function register(
 	});
 }
 
-export async function deleteAccount(accountId?: number): Promise<void> {
-	if (accountId === undefined) throw new HttpException(500, 'No user ID given');
-
+/**
+ * Mock deleteAccount method
+ * @param accountId ID of the account to delete
+ */
+export async function deleteAccount(accountId: string): Promise<void> {
+	// Find user in backing store
 	const user = users.find(u => u.id === accountId);
 
-	if (user === undefined) throw new HttpException(500, 'User does not exist');
+	// Throw if user is not found
+	if (user === undefined || user.deleted)
+		throw new HttpException(500, 'User does not exist');
 
-	if (user.deleted) throw new HttpException(500, 'User deleted');
+	// Throw if user is unverified
+	if (!user.verified) throw new HttpException(500, 'User not verified');
 
+	// Delete user
 	user.deleted = true;
 }

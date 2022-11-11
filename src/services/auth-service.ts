@@ -1,3 +1,5 @@
+import { NextFunction, Request, Response } from 'express';
+import passport from 'passport';
 import { VerifiedCallback } from 'passport-jwt';
 
 /** Represents a token string with an expiration date */
@@ -22,6 +24,14 @@ export async function verifyJwt(
 	_payload: any,
 	_done: VerifiedCallback,
 ): Promise<void> {}
+
+export function protectedRoute(
+	req: Request,
+	res: Response,
+	next: NextFunction,
+) {
+	return passport.authenticate('jwt', { session: false })(req, res, next);
+}
 
 export async function login(
 	_email: string,
@@ -49,4 +59,4 @@ export async function register(
 	_displayName: string,
 ): Promise<void> {}
 
-export async function deleteAccount(_accountId?: number): Promise<void> {}
+export async function deleteAccount(_accountId: string): Promise<void> {}

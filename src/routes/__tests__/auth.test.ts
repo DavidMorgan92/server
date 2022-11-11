@@ -1,4 +1,6 @@
 import request from 'supertest';
+import passport from 'passport';
+import { MockStrategy } from 'passport-mock-strategy';
 import app from '../../server';
 
 jest.mock('../../services/auth-service');
@@ -409,6 +411,26 @@ describe('/auth', () => {
 					},
 				});
 			});
+		});
+	});
+
+	describe('/delete', () => {
+		it('deletes a user', async () => {
+			passport.use(
+				new MockStrategy({
+					user: {
+						id: '1',
+						name: { familyName: '', givenName: '' },
+						emails: [{ value: '', type: '' }],
+						provider: '',
+					},
+				}),
+			);
+
+			const res = await request(app).post('/auth/delete');
+
+			expect(res.status).toBe(200);
+			expect(res.body).toEqual({});
 		});
 	});
 });
