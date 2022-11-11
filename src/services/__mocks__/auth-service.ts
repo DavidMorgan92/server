@@ -10,6 +10,7 @@ const users = [
 		password: 'pass',
 		displayName: 'Dave Verified',
 		verified: true,
+		deleted: false,
 	},
 	{
 		id: 2,
@@ -17,6 +18,7 @@ const users = [
 		password: 'pass',
 		displayName: 'Dave Unverified',
 		verified: false,
+		deleted: false,
 	},
 ];
 
@@ -69,6 +71,9 @@ export async function login(
 	// Throw if email isn't matched
 	if (user === undefined)
 		throw new HttpException(401, 'Could not find user with matching email');
+
+	// Throw if user was deleted
+	if (user.deleted) throw new HttpException(401, 'User deleted');
 
 	// Throw if user is unverified
 	if (!user.verified) throw new HttpException(401, 'User not verified');
@@ -166,5 +171,18 @@ export async function register(
 		password,
 		displayName,
 		verified: false,
+		deleted: false,
 	});
+}
+
+export async function deleteAccount(accountId?: number): Promise<void> {
+	if (accountId === undefined) throw new HttpException(500, 'No user ID given');
+
+	const user = users.find(u => u.id === accountId);
+
+	if (user === undefined) throw new HttpException(500, 'User does not exist');
+
+	if (user.deleted) throw new HttpException(500, 'User deleted');
+
+	user.deleted = true;
 }

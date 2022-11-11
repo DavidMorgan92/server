@@ -48,3 +48,5 @@ export async function register(
 	_password: string,
 	_displayName: string,
 ): Promise<void> {}
+
+export async function deleteAccount(_accountId?: number): Promise<void> {}

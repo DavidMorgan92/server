@@ -43,7 +43,11 @@ auth.post(
 );
 
 /** Delete an account */
-auth.post('/delete', (_req, _res) => {});
+auth.post('/delete', asyncHandler(async (req, res) => {
+	const id = req.user?.id;
+	const result = await authService.deleteAccount(id);
+	res.sendStatus(200);
+}));
 
 /** Verify an account with a verification token */
 auth.get('/verify', (_req, _res) => {});
