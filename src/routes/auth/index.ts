@@ -33,11 +33,7 @@ auth.post(
 	'/register',
 	asyncHandler(async (req, res) => {
 		const data = schemas.register.parse(req.body);
-		await authService.register(
-			data.email,
-			data.password,
-			data.displayName,
-		);
+		await authService.register(data.email, data.password, data.displayName);
 		res.sendStatus(200);
 	}),
 );
@@ -61,7 +57,14 @@ auth.post(
 );
 
 /** Verify an account with a verification token */
-auth.get('/verify', (_req, _res) => {});
+auth.get(
+	'/verify',
+	asyncHandler(async (req, res) => {
+		const data = schemas.verify.parse(req.query);
+		await authService.verifyAccount(data.token);
+		res.sendStatus(200);
+	}),
+);
 
 /** Resend a verification token */
 auth.post('/resend-verification', (_req, _res) => {});

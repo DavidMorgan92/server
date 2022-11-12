@@ -30,6 +30,14 @@ const users = [
 		verified: true,
 		deleted: true,
 	},
+	{
+		id: 4,
+		email: 'dave2@verified.com',
+		password: 'pass',
+		displayName: 'Dave Verified',
+		verified: true,
+		deleted: false,
+	},
 ];
 
 /** Mock backing store for refresh tokens */
@@ -50,6 +58,35 @@ const refreshTokens = [
 		id: 3,
 		userId: -1,
 		token: 'refresh token for wrong user',
+		expiresAt: new Date(new Date().getTime() + 600000),
+	},
+];
+
+/** Mock backing store for verification tokens */
+const verificationTokens = [
+	{
+		userId: 2,
+		token: 'mock verification token',
+		expiresAt: new Date(new Date().getTime() + 600000),
+	},
+	{
+		userId: 2,
+		token: 'expired verification token',
+		expiresAt: new Date(new Date().getTime() - 600000),
+	},
+	{
+		userId: -1,
+		token: 'verification token with bad user ID',
+		expiresAt: new Date(new Date().getTime() + 600000),
+	},
+	{
+		userId: 3,
+		token: 'verification token for deleted user',
+		expiresAt: new Date(new Date().getTime() + 600000),
+	},
+	{
+		userId: 4,
+		token: 'verification token for verified user',
 		expiresAt: new Date(new Date().getTime() + 600000),
 	},
 ];
@@ -210,4 +247,37 @@ export async function deleteAccount(accountId: number): Promise<void> {
 
 	// Delete user
 	user.deleted = true;
+}
+
+/**
+ * Verify an unverified account with a verification token
+ * @param token Verification token belonging to the unverified account
+ */
+export async function verifyAccount(token: string): Promise<void> {
+	// Find verification token in storage
+	const verificationToken = verificationTokens.find(v => v.token === token);
+
+	// Throw if verification token does not exist
+	if (verificationToken === undefined)
+		throw new HttpException(500, 'Invalid verification token');
+
+	// Throw if verification token is expired
+	if (verificationToken.expiresAt < new Date())
+		throw new HttpException(500, 'Expired verification token');
+
+	// Find user with account ID matching the verification token
+	const user = users.find(u => u.id === verificationToken.userId);
+
+	// Throw if user not found
+	if (user === undefined || user.deleted)
+		throw new HttpException(500, 'Failed to update user record');
+
+	// Throw if user is already verified
+	if (user.verified) throw new HttpException(500, 'User already verified');
+
+	// Update user record
+	user.verified = true;
+
+	// Delete verification token
+	verificationTokens.splice(verificationTokens.indexOf(verificationToken), 1);
 }

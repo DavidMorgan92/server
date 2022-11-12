@@ -505,4 +505,72 @@ describe('/auth', () => {
 			});
 		});
 	});
+
+	describe('/verify', () => {
+		describe('GET', () => {
+			it('responds with 200 with good token and unverified account', async () => {
+				const token = 'mock verification token';
+
+				const res = await request(app).get(`/auth/verify?token=${token}`);
+
+				expect(res.status).toBe(200);
+				expect(res.body).toEqual({});
+			});
+
+			it('responds with 500 with non-existent token', async () => {
+				const token = 'non-existent token';
+
+				const res = await request(app).get(`/auth/verify?token=${token}`);
+
+				expect(res.status).toBe(500);
+				expect(res.body).toEqual({ message: 'Invalid verification token' });
+			});
+
+			it('responds with 500 with expired token', async () => {
+				const token = 'expired verification token';
+
+				const res = await request(app).get(`/auth/verify?token=${token}`);
+
+				expect(res.status).toBe(500);
+				expect(res.body).toEqual({ message: 'Expired verification token' });
+			});
+
+			it('responds with 500 with token for non-existent user', async () => {
+				const token = 'verification token with bad user ID';
+
+				const res = await request(app).get(`/auth/verify?token=${token}`);
+
+				expect(res.status).toBe(500);
+				expect(res.body).toEqual({ message: 'Failed to update user record' });
+			});
+
+			it('responds with 500 with token for deleted user', async () => {
+				const token = 'verification token for deleted user';
+
+				const res = await request(app).get(`/auth/verify?token=${token}`);
+
+				expect(res.status).toBe(500);
+				expect(res.body).toEqual({ message: 'Failed to update user record' });
+			});
+
+			it('responds with 500 with token for already verified user', async () => {
+				const token = 'verification token for verified user';
+
+				const res = await request(app).get(`/auth/verify?token=${token}`);
+
+				expect(res.status).toBe(500);
+				expect(res.body).toEqual({ message: 'User already verified' });
+			});
+
+			it('responds with 400 if no token is given', async () => {
+				const res = await request(app).get('/auth/verify');
+
+				expect(res.status).toBe(400);
+				expect(res.body).toEqual({
+					_errors: [],
+					token: { _errors: ['Required'] },
+				});
+			});
+		});
+	});
 });

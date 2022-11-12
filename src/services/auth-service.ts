@@ -60,3 +60,5 @@ export async function register(
 ): Promise<void> {}
 
 export async function deleteAccount(_accountId: number): Promise<void> {}
+
+export async function verifyAccount(_token: string): Promise<void> {}

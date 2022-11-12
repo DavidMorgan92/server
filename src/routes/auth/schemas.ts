@@ -13,10 +13,14 @@ export const token = z.object({
 });
 
 /** Validation schema for register endpoint input */
-export const register = z
-	.object({
-		email: z.string().trim().email().min(1).max(100),
-		// TODO: Improve password validation
-		password: z.string().min(1).max(100),
-		displayName: z.string().trim().min(1).max(100),
-	});
+export const register = z.object({
+	email: z.string().trim().email().min(1).max(100),
+	// TODO: Improve password validation
+	password: z.string().min(1).max(100),
+	displayName: z.string().trim().min(1).max(100),
+});
+
+/** Validation schema for verify endpoint input */
+export const verify = z.object({
+	token: z.string(),
+});
