@@ -67,7 +67,14 @@ auth.get(
 );
 
 /** Resend a verification token */
-auth.post('/resend-verification', (_req, _res) => {});
+auth.post(
+	'/resend-verification',
+	asyncHandler(async (req, res) => {
+		const data = schemas.resendVerification.parse(req.body);
+		await authService.resendVerification(data.email);
+		res.sendStatus(200);
+	}),
+);
 
 /** Send a forgot password token */
 auth.post('/forgot-password', (_req, _res) => {});

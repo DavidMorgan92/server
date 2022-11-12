@@ -38,6 +38,14 @@ const users = [
 		verified: true,
 		deleted: false,
 	},
+	{
+		id: 5,
+		email: 'dave2@unverified.com',
+		password: 'pass',
+		displayName: 'Dave Unverified',
+		verified: false,
+		deleted: false,
+	},
 ];
 
 /** Mock backing store for refresh tokens */
@@ -280,4 +288,29 @@ export async function verifyAccount(token: string): Promise<void> {
 
 	// Delete verification token
 	verificationTokens.splice(verificationTokens.indexOf(verificationToken), 1);
+}
+
+/**
+ * Mock resendVerification method
+ * @param email Email address to resend verification token to
+ */
+export async function resendVerification(email: string): Promise<void> {
+	// Find user in backing store
+	const user = users.find(u => u.email === email);
+
+	// Throw if email isn't matched
+	if (user === undefined || user.deleted)
+		throw new HttpException(500, 'Could not find user with matching email');
+	
+	// Throw if user is already verified
+	if (user.verified) throw new HttpException(500, 'User already verified');
+
+	// Send new verification token
+
+	// Delete existing verification tokens
+	while (true) {
+		const index = verificationTokens.findIndex(v => v.userId === user.id);
+		if (index < 0) break;
+		verificationTokens.splice(index, 1);
+	}
 }

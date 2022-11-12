@@ -24,3 +24,8 @@ export const register = z.object({
 export const verify = z.object({
 	token: z.string(),
 });
+
+/** Validation schema for resend-verification endpoint input */
+export const resendVerification = z.object({
+	email: z.string(),
+});
