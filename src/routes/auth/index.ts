@@ -33,12 +33,12 @@ auth.post(
 	'/register',
 	asyncHandler(async (req, res) => {
 		const data = schemas.register.parse(req.body);
-		const result = await authService.register(
+		await authService.register(
 			data.email,
 			data.password,
 			data.displayName,
 		);
-		res.json(result);
+		res.sendStatus(200);
 	}),
 );
 

@@ -7,7 +7,7 @@ import { TokenPair } from '../auth-service';
 /** Mock backing store for users */
 const users = [
 	{
-		id: '1',
+		id: 1,
 		email: 'dave@verified.com',
 		password: 'pass',
 		displayName: 'Dave Verified',
@@ -15,12 +15,20 @@ const users = [
 		deleted: false,
 	},
 	{
-		id: '2',
+		id: 2,
 		email: 'dave@unverified.com',
 		password: 'pass',
 		displayName: 'Dave Unverified',
 		verified: false,
 		deleted: false,
+	},
+	{
+		id: 3,
+		email: 'dave@deleted.com',
+		password: 'pass',
+		displayName: 'Dave Deleted',
+		verified: true,
+		deleted: true,
 	},
 ];
 
@@ -28,19 +36,19 @@ const users = [
 const refreshTokens = [
 	{
 		id: 1,
-		userId: '1',
+		userId: 1,
 		token: 'mock refresh token',
 		expiresAt: new Date(new Date().getTime() + 600000),
 	},
 	{
 		id: 2,
-		userId: '1',
+		userId: 1,
 		token: 'expired refresh token',
 		expiresAt: new Date(new Date().getTime() - 600000),
 	},
 	{
 		id: 3,
-		userId: '-1',
+		userId: -1,
 		token: 'refresh token for wrong user',
 		expiresAt: new Date(new Date().getTime() + 600000),
 	},
@@ -57,6 +65,9 @@ export async function verifyJwt(
 	_done: VerifiedCallback,
 ): Promise<void> {}
 
+/**
+ * Mock authentication middleware
+ */
 export function protectedRoute(
 	req: Request,
 	res: Response,
@@ -173,7 +184,7 @@ export async function register(
 
 	// Add new user to backing store
 	users.push({
-		id: String(newUserId++),
+		id: newUserId++,
 		email,
 		password,
 		displayName,
@@ -186,7 +197,7 @@ export async function register(
  * Mock deleteAccount method
  * @param accountId ID of the account to delete
  */
-export async function deleteAccount(accountId: string): Promise<void> {
+export async function deleteAccount(accountId: number): Promise<void> {
 	// Find user in backing store
 	const user = users.find(u => u.id === accountId);
 

@@ -1,6 +1,6 @@
 import request from 'supertest';
 import passport from 'passport';
-import { MockStrategy } from 'passport-mock-strategy';
+import { MockStrategy, DoneCallback } from 'passport-mock-strategy';
 import app from '../../server';
 
 jest.mock('../../services/auth-service');
@@ -28,6 +28,17 @@ describe('/auth', () => {
 
 			it('responds with 401 if email is not matched', async () => {
 				const data = { email: 'user.does.not@exist.com', password: 'pass' };
+
+				const res = await request(app).post('/auth/login').send(data);
+
+				expect(res.status).toBe(401);
+				expect(res.body).toEqual({
+					message: 'Could not find user with matching email',
+				});
+			});
+
+			it('responds with 401 if user is deleted', async () => {
+				const data = { email: 'dave@deleted.com', password: 'pass' };
 
 				const res = await request(app).post('/auth/login').send(data);
 
@@ -107,6 +118,20 @@ describe('/auth', () => {
 			it('responds with 401 if email is not matched', async () => {
 				const data = {
 					email: 'user.does.not@exist.com',
+					refreshToken: 'mock refresh token',
+				};
+
+				const res = await request(app).post('/auth/token').send(data);
+
+				expect(res.status).toBe(401);
+				expect(res.body).toEqual({
+					message: 'Could not find user with matching email',
+				});
+			});
+
+			it('responds with 401 if user is deleted', async () => {
+				const data = {
+					email: 'dave@deleted.com',
 					refreshToken: 'mock refresh token',
 				};
 
@@ -206,10 +231,23 @@ describe('/auth', () => {
 				const res = await request(app).post('/auth/register').send(data);
 
 				expect(res.status).toBe(200);
-				expect(res.body).toEqual('');
+				expect(res.body).toEqual({});
 			});
 
-			it('responds with 500 if the email is already registered', async () => {
+			it('responds with 200 if the email is already registered and the user is deleted', async () => {
+				const data = {
+					email: 'dave@deleted.com',
+					password: 'pass',
+					displayName: 'New User',
+				};
+
+				const res = await request(app).post('/auth/register').send(data);
+
+				expect(res.status).toBe(200);
+				expect(res.body).toEqual({});
+			});
+
+			it('responds with 500 if the email is already registered and the user is not deleted', async () => {
 				const data = {
 					email: 'dave@verified.com',
 					password: 'pass',
@@ -415,22 +453,56 @@ describe('/auth', () => {
 	});
 
 	describe('/delete', () => {
-		it('deletes a user', async () => {
-			passport.use(
-				new MockStrategy({
-					user: {
-						id: '1',
-						name: { familyName: '', givenName: '' },
-						emails: [{ value: '', type: '' }],
-						provider: '',
-					},
-				}),
-			);
+		describe('POST', () => {
+			it('responds with 200 if user is authenticated, verified and not deleted', async () => {
+				passport.use(new MockStrategy({ user: { id: 1 } }));
 
-			const res = await request(app).post('/auth/delete');
+				const res = await request(app).post('/auth/delete');
 
-			expect(res.status).toBe(200);
-			expect(res.body).toEqual({});
+				expect(res.status).toBe(200);
+				expect(res.body).toEqual({});
+			});
+
+			it('responds with 401 if user is unauthenticated', async () => {
+				passport.use(
+					new MockStrategy(undefined, (_user: any, done: DoneCallback) => {
+						// Indicate no matching user
+						done();
+					}),
+				);
+
+				const res = await request(app).post('/auth/delete');
+
+				expect(res.status).toBe(401);
+				expect(res.body).toEqual({});
+			});
+
+			it('responds with 500 if user ID is not found', async () => {
+				passport.use(new MockStrategy({ user: { id: -1 } }));
+
+				const res = await request(app).post('/auth/delete');
+
+				expect(res.status).toBe(500);
+				expect(res.body).toEqual({ message: 'User does not exist' });
+			});
+
+			it('responds with 500 if user is deleted', async () => {
+				passport.use(new MockStrategy({ user: { id: 3 } }));
+
+				const res = await request(app).post('/auth/delete');
+
+				expect(res.status).toBe(500);
+				expect(res.body).toEqual({ message: 'User does not exist' });
+			});
+
+			it('responds with 500 if user is not verified', async () => {
+				passport.use(new MockStrategy({ user: { id: 2 } }));
+
+				const res = await request(app).post('/auth/delete');
+
+				expect(res.status).toBe(500);
+				expect(res.body).toEqual({ message: 'User not verified' });
+			});
 		});
 	});
 });

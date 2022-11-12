@@ -59,4 +59,4 @@ export async function register(
 	_displayName: string,
 ): Promise<void> {}
 
-export async function deleteAccount(_accountId: string): Promise<void> {}
+export async function deleteAccount(_accountId: number): Promise<void> {}
