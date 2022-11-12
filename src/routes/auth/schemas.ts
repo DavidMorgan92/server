@@ -29,3 +29,8 @@ export const verify = z.object({
 export const resendVerification = z.object({
 	email: z.string(),
 });
+
+/** Validation schema for forgot-password endpoint input */
+export const forgotPassword = z.object({
+	email: z.string(),
+});

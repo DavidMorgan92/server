@@ -576,7 +576,7 @@ describe('/auth', () => {
 
 	describe('/resend-verification', () => {
 		describe('POST', () => {
-			it('responds with 200 with good token and unverified account', async () => {
+			it('responds with 200 for unverified account', async () => {
 				const data = { email: 'dave2@unverified.com' };
 
 				const res = await request(app)
@@ -630,6 +630,62 @@ describe('/auth', () => {
 				const res = await request(app)
 					.post('/auth/resend-verification')
 					.send(data);
+
+				expect(res.status).toBe(400);
+				expect(res.body).toEqual({
+					_errors: [],
+					email: { _errors: ['Required'] },
+				});
+			});
+		});
+	});
+
+	describe('/forgot-password', () => {
+		describe('POST', () => {
+			it('responds with 200 for verified account', async () => {
+				const data = { email: 'dave2@verified.com' };
+
+				const res = await request(app).post('/auth/forgot-password').send(data);
+
+				expect(res.status).toBe(200);
+				expect(res.body).toEqual({});
+			});
+
+			it('responds with 500 with non-existent email', async () => {
+				const data = { email: 'user.does.not@exist.com' };
+
+				const res = await request(app).post('/auth/forgot-password').send(data);
+
+				expect(res.status).toBe(500);
+				expect(res.body).toEqual({
+					message: 'Could not find user with matching email',
+				});
+			});
+
+			it('responds with 500 if user is deleted', async () => {
+				const data = { email: 'dave@deleted.com' };
+
+				const res = await request(app).post('/auth/forgot-password').send(data);
+
+				expect(res.status).toBe(500);
+				expect(res.body).toEqual({
+					message: 'Could not find user with matching email',
+				});
+			});
+
+			it('responds with 500 if user is not verified', async () => {
+				const data = { email: 'dave2@unverified.com' };
+
+				const res = await request(app).post('/auth/forgot-password').send(data);
+
+				expect(res.status).toBe(500);
+				expect(res.body).toEqual({ message: 'User not verified' });
+			});
+
+			it('responds with 400 if email is not given', async () => {
+				const data = {};
+
+				const res = await request(app).post('/auth/forgot-password').send(data);
 
 				expect(res.status).toBe(400);
 				expect(res.body).toEqual({

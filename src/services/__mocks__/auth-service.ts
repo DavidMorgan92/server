@@ -99,6 +99,15 @@ const verificationTokens = [
 	},
 ];
 
+/** Mock backing store for forgot password tokens */
+const forgotPasswordTokens = [
+	{
+		userId: 4,
+		token: 'mock forgot password token',
+		expiresAt: new Date(new Date().getTime() + 600000),
+	},
+];
+
 /** ID for a new user */
 let newUserId = users.length + 1;
 
@@ -301,7 +310,7 @@ export async function resendVerification(email: string): Promise<void> {
 	// Throw if email isn't matched
 	if (user === undefined || user.deleted)
 		throw new HttpException(500, 'Could not find user with matching email');
-	
+
 	// Throw if user is already verified
 	if (user.verified) throw new HttpException(500, 'User already verified');
 
@@ -312,5 +321,30 @@ export async function resendVerification(email: string): Promise<void> {
 		const index = verificationTokens.findIndex(v => v.userId === user.id);
 		if (index < 0) break;
 		verificationTokens.splice(index, 1);
+	}
+}
+
+/**
+ * Mock sendForgotPasswordToken method
+ * @param email Email address to send forgot password token to
+ */
+export async function sendForgotPasswordToken(email: string): Promise<void> {
+	// Find user in backing store
+	const user = users.find(u => u.email === email);
+
+	// Throw if email isn't matched
+	if (user === undefined || user.deleted)
+		throw new HttpException(500, 'Could not find user with matching email');
+
+	// Throw if user is not verified
+	if (!user.verified) throw new HttpException(500, 'User not verified');
+
+	// Send new forgot password token
+
+	// Delete existing forgot password tokens
+	while (true) {
+		const index = forgotPasswordTokens.findIndex(f => f.userId === user.id);
+		if (index < 0) break;
+		forgotPasswordTokens.splice(index, 1);
 	}
 }

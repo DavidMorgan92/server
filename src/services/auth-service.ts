@@ -64,3 +64,5 @@ export async function deleteAccount(_accountId: number): Promise<void> {}
 export async function verifyAccount(_token: string): Promise<void> {}
 
 export async function resendVerification(_email: string): Promise<void> {}
+
+export async function sendForgotPasswordToken(_email: string): Promise<void> {}

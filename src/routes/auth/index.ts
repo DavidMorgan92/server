@@ -77,7 +77,14 @@ auth.post(
 );
 
 /** Send a forgot password token */
-auth.post('/forgot-password', (_req, _res) => {});
+auth.post(
+	'/forgot-password',
+	asyncHandler(async (req, res) => {
+		const data = schemas.forgotPassword.parse(req.body);
+		await authService.sendForgotPasswordToken(data.email);
+		res.sendStatus(200);
+	}),
+);
 
 /** Reset password with a forgot password token */
 auth.post('/reset-password', (_req, _res) => {});
