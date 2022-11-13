@@ -66,3 +66,8 @@ export async function verifyAccount(_token: string): Promise<void> {}
 export async function resendVerification(_email: string): Promise<void> {}
 
 export async function sendForgotPasswordToken(_email: string): Promise<void> {}
+
+export async function resetPassword(
+	_newPassword: string,
+	token: string,
+): Promise<void> {}

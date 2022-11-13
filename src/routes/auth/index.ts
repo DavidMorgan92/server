@@ -87,7 +87,14 @@ auth.post(
 );
 
 /** Reset password with a forgot password token */
-auth.post('/reset-password', (_req, _res) => {});
+auth.post(
+	'/reset-password',
+	asyncHandler(async (req, res) => {
+		const data = schemas.resetPassword.parse(req.body);
+		await authService.resetPassword(data.newPassword, data.token);
+		res.sendStatus(200);
+	}),
+);
 
 /** Change password */
 auth.post('/change-password', (_req, _res) => {});

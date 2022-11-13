@@ -46,6 +46,30 @@ const users = [
 		verified: false,
 		deleted: false,
 	},
+	{
+		id: 6,
+		email: 'dave3@verified.com',
+		password: 'pass',
+		displayName: 'Dave Verified',
+		verified: true,
+		deleted: false,
+	},
+	{
+		id: 7,
+		email: 'dave2@deleted.com',
+		password: 'pass',
+		displayName: 'Dave Deleted',
+		verified: true,
+		deleted: true,
+	},
+	{
+		id: 8,
+		email: 'dave3@unverified.com',
+		password: 'pass',
+		displayName: 'Dave Unverified',
+		verified: false,
+		deleted: false,
+	},
 ];
 
 /** Mock backing store for refresh tokens */
@@ -104,6 +128,31 @@ const forgotPasswordTokens = [
 	{
 		userId: 4,
 		token: 'mock forgot password token',
+		expiresAt: new Date(new Date().getTime() + 600000),
+	},
+	{
+		userId: 6,
+		token: 'mock forgot password token 2',
+		expiresAt: new Date(new Date().getTime() + 600000),
+	},
+	{
+		userId: 6,
+		token: 'expired forgot password token',
+		expiresAt: new Date(new Date().getTime() - 600000),
+	},
+	{
+		userId: -1,
+		token: 'forgot password token with invalid user ID',
+		expiresAt: new Date(new Date().getTime() + 600000),
+	},
+	{
+		userId: 7,
+		token: 'forgot password token with deleted user',
+		expiresAt: new Date(new Date().getTime() + 600000),
+	},
+	{
+		userId: 8,
+		token: 'forgot password token with unverified user',
 		expiresAt: new Date(new Date().getTime() + 600000),
 	},
 ];
@@ -347,4 +396,44 @@ export async function sendForgotPasswordToken(email: string): Promise<void> {
 		if (index < 0) break;
 		forgotPasswordTokens.splice(index, 1);
 	}
+}
+
+/**
+ * Set a new password for a user with a forgot password token
+ * @param newPassword New password
+ * @param token Forgot password token
+ */
+export async function resetPassword(
+	newPassword: string,
+	token: string,
+): Promise<void> {
+	// Find forgot password token in storage
+	const forgotPasswordToken = forgotPasswordTokens.find(f => f.token === token);
+
+	// Throw if forgot password token does not exist
+	if (forgotPasswordToken === undefined)
+		throw new HttpException(500, 'Invalid forgot password token');
+
+	// Throw if forgot password token is expired
+	if (forgotPasswordToken.expiresAt < new Date())
+		throw new HttpException(500, 'Expired forgot password token');
+
+	// Find user with account ID matching the forgot password token
+	const user = users.find(u => u.id === forgotPasswordToken.userId);
+
+	// Throw if user not found
+	if (user === undefined || user.deleted)
+		throw new HttpException(500, 'Failed to update user record');
+
+	// Throw if user is not verified
+	if (!user.verified) throw new HttpException(500, 'User not verified');
+
+	// Update user record
+	user.password = newPassword;
+
+	// Delete forgot password token
+	forgotPasswordTokens.splice(
+		forgotPasswordTokens.indexOf(forgotPasswordToken),
+		1,
+	);
 }

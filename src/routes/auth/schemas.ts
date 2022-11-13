@@ -34,3 +34,10 @@ export const resendVerification = z.object({
 export const forgotPassword = z.object({
 	email: z.string(),
 });
+
+/** Validation schema for reset-password endpoint input */
+export const resetPassword = z.object({
+	// TODO: Improve password validation
+	newPassword: z.string().min(1).max(100),
+	token: z.string(),
+});

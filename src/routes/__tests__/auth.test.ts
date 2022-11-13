@@ -695,4 +695,142 @@ describe('/auth', () => {
 			});
 		});
 	});
+
+	describe('/reset-password', () => {
+		describe('POST', () => {
+			it('responds with 200 with good token and password', async () => {
+				const data = {
+					newPassword: 'pass',
+					token: 'mock forgot password token 2',
+				};
+
+				const res = await request(app).post('/auth/reset-password').send(data);
+
+				expect(res.status).toBe(200);
+				expect(res.body).toEqual({});
+			});
+
+			it('responds with 500 with non-existent token', async () => {
+				const data = {
+					newPassword: 'pass',
+					token: 'non-existent token',
+				};
+
+				const res = await request(app).post('/auth/reset-password').send(data);
+
+				expect(res.status).toBe(500);
+				expect(res.body).toEqual({ message: 'Invalid forgot password token' });
+			});
+
+			it('responds with 500 with expired token', async () => {
+				const data = {
+					newPassword: 'pass',
+					token: 'expired forgot password token',
+				};
+
+				const res = await request(app).post('/auth/reset-password').send(data);
+
+				expect(res.status).toBe(500);
+				expect(res.body).toEqual({ message: 'Expired forgot password token' });
+			});
+
+			it('responds with 500 with token with bad user ID', async () => {
+				const data = {
+					newPassword: 'pass',
+					token: 'forgot password token with invalid user ID',
+				};
+
+				const res = await request(app).post('/auth/reset-password').send(data);
+
+				expect(res.status).toBe(500);
+				expect(res.body).toEqual({ message: 'Failed to update user record' });
+			});
+
+			it('responds with 500 with token with deleted user', async () => {
+				const data = {
+					newPassword: 'pass',
+					token: 'forgot password token with deleted user',
+				};
+
+				const res = await request(app).post('/auth/reset-password').send(data);
+
+				expect(res.status).toBe(500);
+				expect(res.body).toEqual({ message: 'Failed to update user record' });
+			});
+
+			it('responds with 500 with token with unverified user', async () => {
+				const data = {
+					newPassword: 'pass',
+					token: 'forgot password token with unverified user',
+				};
+
+				const res = await request(app).post('/auth/reset-password').send(data);
+
+				expect(res.status).toBe(500);
+				expect(res.body).toEqual({ message: 'User not verified' });
+			});
+
+			it('responds with 400 if new password is not given', async () => {
+				const data = {
+					token: 'forgot password token with unverified user',
+				};
+
+				const res = await request(app).post('/auth/reset-password').send(data);
+
+				expect(res.status).toBe(400);
+				expect(res.body).toEqual({
+					_errors: [],
+					newPassword: { _errors: ['Required'] },
+				});
+			});
+
+			it('responds with 400 if new password is under 1 character', async () => {
+				const data = {
+					newPassword: '',
+					token: 'forgot password token with unverified user',
+				};
+
+				const res = await request(app).post('/auth/reset-password').send(data);
+
+				expect(res.status).toBe(400);
+				expect(res.body).toEqual({
+					_errors: [],
+					newPassword: {
+						_errors: ['String must contain at least 1 character(s)'],
+					},
+				});
+			});
+
+			it('responds with 400 if new password is over 100 characters', async () => {
+				const password = new Array(101).fill('a').join('');
+
+				const data = {
+					newPassword: password,
+					token: 'forgot password token with unverified user',
+				};
+
+				const res = await request(app).post('/auth/reset-password').send(data);
+
+				expect(res.status).toBe(400);
+				expect(res.body).toEqual({
+					_errors: [],
+					newPassword: {
+						_errors: ['String must contain at most 100 character(s)'],
+					},
+				});
+			});
+
+			it('responds with 400 if token is not given', async () => {
+				const data = { newPassword: 'pass' };
+
+				const res = await request(app).post('/auth/reset-password').send(data);
+
+				expect(res.status).toBe(400);
+				expect(res.body).toEqual({
+					_errors: [],
+					token: { _errors: ['Required'] },
+				});
+			});
+		});
+	});
 });
