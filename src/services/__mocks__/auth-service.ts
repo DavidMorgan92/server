@@ -437,3 +437,32 @@ export async function resetPassword(
 		1,
 	);
 }
+
+/**
+ * Change the password for the given account
+ * @param accountId ID of the account whose password to change
+ * @param password Current password
+ * @param newPassword New password
+ */
+export async function changePassword(
+	accountId: number,
+	password: string,
+	newPassword: string,
+): Promise<void> {
+	// Find user with account ID matching the forgot password token
+	const user = users.find(u => u.id === accountId);
+
+	// Throw if user not found
+	if (user === undefined || user.deleted)
+		throw new HttpException(500, 'Failed to update user record');
+
+	// Throw if user is not verified
+	if (!user.verified) throw new HttpException(500, 'User not verified');
+
+	// Throw if password is incorrect
+	if (user.password !== password)
+		throw new HttpException(500, 'Incorrect password');
+
+	// Update user record
+	user.password = newPassword;
+}

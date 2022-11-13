@@ -97,6 +97,22 @@ auth.post(
 );
 
 /** Change password */
-auth.post('/change-password', (_req, _res) => {});
+auth.post(
+	'/change-password',
+	authService.protectedRoute,
+	asyncHandler(async (req, res) => {
+		const id = req.user?.id;
+
+		// Return 401 Unauthorized status if user ID is undefined
+		if (id === undefined) {
+			res.sendStatus(401);
+			return;
+		}
+
+		const data = schemas.changePassword.parse(req.body);
+		await authService.changePassword(id, data.password, data.newPassword);
+		res.sendStatus(200);
+	}),
+);
 
 export default auth;

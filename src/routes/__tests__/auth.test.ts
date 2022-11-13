@@ -833,4 +833,124 @@ describe('/auth', () => {
 			});
 		});
 	});
+
+	describe('/change-password', () => {
+		describe('POST', () => {
+			it('responds with 200 with good input', async () => {
+				passport.use(new MockStrategy({ user: { id: 6 } }));
+
+				const data = { password: 'pass', newPassword: 'pass' };
+
+				const res = await request(app).post('/auth/change-password').send(data);
+
+				expect(res.status).toBe(200);
+				expect(res.body).toEqual({});
+			});
+
+			it('responds with 500 when user does not exist in storage', async () => {
+				passport.use(new MockStrategy({ user: { id: -1 } }));
+
+				const data = { password: 'pass', newPassword: 'pass' };
+
+				const res = await request(app).post('/auth/change-password').send(data);
+
+				expect(res.status).toBe(500);
+				expect(res.body).toEqual({ message: 'Failed to update user record' });
+			});
+
+			it('responds with 500 when user is deleted', async () => {
+				passport.use(new MockStrategy({ user: { id: 7 } }));
+
+				const data = { password: 'pass', newPassword: 'pass' };
+
+				const res = await request(app).post('/auth/change-password').send(data);
+
+				expect(res.status).toBe(500);
+				expect(res.body).toEqual({ message: 'Failed to update user record' });
+			});
+
+			it('responds with 500 when user is unverified', async () => {
+				passport.use(new MockStrategy({ user: { id: 8 } }));
+
+				const data = { password: 'pass', newPassword: 'pass' };
+
+				const res = await request(app).post('/auth/change-password').send(data);
+
+				expect(res.status).toBe(500);
+				expect(res.body).toEqual({ message: 'User not verified' });
+			});
+
+			it('responds with 500 when password is incorrect', async () => {
+				passport.use(new MockStrategy({ user: { id: 6 } }));
+
+				const data = { password: 'incorrect password', newPassword: 'pass' };
+
+				const res = await request(app).post('/auth/change-password').send(data);
+
+				expect(res.status).toBe(500);
+				expect(res.body).toEqual({ message: 'Incorrect password' });
+			});
+
+			it('responds with 400 when password is not given', async () => {
+				passport.use(new MockStrategy({ user: { id: 6 } }));
+
+				const data = { newPassword: 'pass' };
+
+				const res = await request(app).post('/auth/change-password').send(data);
+
+				expect(res.status).toBe(400);
+				expect(res.body).toEqual({
+					_errors: [],
+					password: { _errors: ['Required'] },
+				});
+			});
+
+			it('responds with 400 when newPassword is not given', async () => {
+				passport.use(new MockStrategy({ user: { id: 6 } }));
+
+				const data = { password: 'pass' };
+
+				const res = await request(app).post('/auth/change-password').send(data);
+
+				expect(res.status).toBe(400);
+				expect(res.body).toEqual({
+					_errors: [],
+					newPassword: { _errors: ['Required'] },
+				});
+			});
+
+			it('responds with 400 when newPassword is less than 1 character', async () => {
+				passport.use(new MockStrategy({ user: { id: 6 } }));
+
+				const data = { password: 'pass', newPassword: '' };
+
+				const res = await request(app).post('/auth/change-password').send(data);
+
+				expect(res.status).toBe(400);
+				expect(res.body).toEqual({
+					_errors: [],
+					newPassword: {
+						_errors: ['String must contain at least 1 character(s)'],
+					},
+				});
+			});
+
+			it('responds with 400 when newPassword is over 100 characters', async () => {
+				passport.use(new MockStrategy({ user: { id: 6 } }));
+
+				const password = new Array(101).fill('a').join('');
+				const data = { password: 'pass', newPassword: password };
+
+				const res = await request(app).post('/auth/change-password').send(data);
+
+				expect(res.status).toBe(400);
+				expect(res.body).toEqual({
+					_errors: [],
+					newPassword: {
+						_errors: ['String must contain at most 100 character(s)'],
+					},
+				});
+			});
+		});
+	});
 });

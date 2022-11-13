@@ -71,3 +71,9 @@ export async function resetPassword(
 	_newPassword: string,
 	token: string,
 ): Promise<void> {}
+
+export async function changePassword(
+	_accountId: number,
+	_password: string,
+	_newPassword: string,
+): Promise<void> {}

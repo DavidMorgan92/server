@@ -41,3 +41,10 @@ export const resetPassword = z.object({
 	newPassword: z.string().min(1).max(100),
 	token: z.string(),
 });
+
+/** Validation schema for change-password endpoint input */
+export const changePassword = z.object({
+	password: z.string(),
+	// TODO: Improve password validation
+	newPassword: z.string().min(1).max(100),
+});
