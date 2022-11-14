@@ -20,6 +20,7 @@
 		"@types/morgan": "^1.9.3",
 		"@types/passport": "^1.0.11",
 		"@types/passport-jwt": "^3.0.7",
+		"@types/pg": "^8.6.5",
 		"@types/supertest": "^2.0.12",
 		"jest": "^29.2.2",
 		"passport-mock-strategy": "https://github.com/DavidMorgan92/passport-mock-strategy.git",
@@ -38,6 +39,7 @@
 		"morgan": "^1.10.0",
 		"passport": "^0.6.0",
 		"passport-jwt": "^4.0.0",
+		"pg": "^8.8.0",
 		"zod": "^3.19.1"
 	}
 }

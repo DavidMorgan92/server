@@ -477,6 +477,15 @@ describe('/auth', () => {
 				expect(res.body).toEqual({});
 			});
 
+			it('responds with 401 if user ID is undefined', async () => {
+				passport.use(new MockStrategy({ user: { id: undefined } }));
+
+				const res = await request(app).post('/auth/delete');
+
+				expect(res.status).toBe(401);
+				expect(res.body).toEqual({});
+			});
+
 			it('responds with 500 if user ID is not found', async () => {
 				passport.use(new MockStrategy({ user: { id: -1 } }));
 
@@ -844,6 +853,29 @@ describe('/auth', () => {
 				const res = await request(app).post('/auth/change-password').send(data);
 
 				expect(res.status).toBe(200);
+				expect(res.body).toEqual({});
+			});
+
+			it('responds with 401 if user is unauthenticated', async () => {
+				passport.use(
+					new MockStrategy(undefined, (_user: any, done: DoneCallback) => {
+						// Indicate no matching user
+						done();
+					}),
+				);
+
+				const res = await request(app).post('/auth/change-password');
+
+				expect(res.status).toBe(401);
+				expect(res.body).toEqual({});
+			});
+
+			it('responds with 401 if user ID is undefined', async () => {
+				passport.use(new MockStrategy({ user: { id: undefined } }));
+
+				const res = await request(app).post('/auth/change-password');
+
+				expect(res.status).toBe(401);
 				expect(res.body).toEqual({});
 			});
 
