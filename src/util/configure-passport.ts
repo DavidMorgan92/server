@@ -9,6 +9,7 @@ import fs from 'fs';
 import { verifyJwt } from '../services/auth-service';
 
 // Throw if public PEM key filename isn't configured
+/* istanbul ignore if */
 if (process.env.JWT_PUBLIC_KEY_FILENAME === undefined)
 	throw new Error('Configure JWT_PUBLIC_KEY_FILENAME environment variable');
 

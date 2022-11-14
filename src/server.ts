@@ -14,6 +14,7 @@ const app = express();
 app.use(helmet());
 
 // Use Morgan logger (disable if running tests)
+/* istanbul ignore if */
 if (process.env.NODE_ENV !== 'test') app.use(morgan('dev'));
 
 // Configure CORS
