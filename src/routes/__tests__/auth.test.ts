@@ -1,6 +1,6 @@
 import request from 'supertest';
 import passport from 'passport';
-import { MockStrategy, DoneCallback } from 'passport-mock-strategy';
+import { MockStrategy, DoneCallback } from '../../util/mock-strategy';
 import app from '../../server';
 
 jest.mock('../../services/auth-service');
@@ -477,6 +477,15 @@ describe('/auth', () => {
 				expect(res.body).toEqual({});
 			});
 
+			it('responds with 401 if user is undefined', async () => {
+				passport.use(new MockStrategy({ user: undefined }));
+
+				const res = await request(app).post('/auth/delete');
+
+				expect(res.status).toBe(401);
+				expect(res.body).toEqual({});
+			});
+
 			it('responds with 401 if user ID is undefined', async () => {
 				passport.use(new MockStrategy({ user: { id: undefined } }));
 
@@ -863,6 +872,15 @@ describe('/auth', () => {
 						done();
 					}),
 				);
+
+				const res = await request(app).post('/auth/change-password');
+
+				expect(res.status).toBe(401);
+				expect(res.body).toEqual({});
+			});
+
+			it('responds with 401 if user is undefined', async () => {
+				passport.use(new MockStrategy({ user: undefined }));
 
 				const res = await request(app).post('/auth/change-password');
 
