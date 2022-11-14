@@ -43,9 +43,7 @@ describe('/auth', () => {
 				const res = await request(app).post('/auth/login').send(data);
 
 				expect(res.status).toBe(401);
-				expect(res.body).toEqual({
-					message: 'Could not find user with matching email',
-				});
+				expect(res.body).toEqual({ message: 'User is deleted' });
 			});
 
 			it('responds with 401 if user is unverified', async () => {
@@ -138,9 +136,7 @@ describe('/auth', () => {
 				const res = await request(app).post('/auth/token').send(data);
 
 				expect(res.status).toBe(401);
-				expect(res.body).toEqual({
-					message: 'Could not find user with matching email',
-				});
+				expect(res.body).toEqual({ message: 'User is deleted' });
 			});
 
 			it('responds with 401 if user is unverified', async () => {
@@ -510,7 +506,7 @@ describe('/auth', () => {
 				const res = await request(app).post('/auth/delete');
 
 				expect(res.status).toBe(500);
-				expect(res.body).toEqual({ message: 'User does not exist' });
+				expect(res.body).toEqual({ message: 'User is deleted' });
 			});
 
 			it('responds with 500 if user is not verified', async () => {
@@ -568,7 +564,7 @@ describe('/auth', () => {
 				const res = await request(app).get(`/auth/verify?token=${token}`);
 
 				expect(res.status).toBe(500);
-				expect(res.body).toEqual({ message: 'Failed to update user record' });
+				expect(res.body).toEqual({ message: 'User is deleted' });
 			});
 
 			it('responds with 500 with token for already verified user', async () => {
@@ -626,9 +622,7 @@ describe('/auth', () => {
 					.send(data);
 
 				expect(res.status).toBe(500);
-				expect(res.body).toEqual({
-					message: 'Could not find user with matching email',
-				});
+				expect(res.body).toEqual({ message: 'User is deleted' });
 			});
 
 			it('responds with 500 if user is already verified', async () => {
@@ -686,9 +680,7 @@ describe('/auth', () => {
 				const res = await request(app).post('/auth/forgot-password').send(data);
 
 				expect(res.status).toBe(500);
-				expect(res.body).toEqual({
-					message: 'Could not find user with matching email',
-				});
+				expect(res.body).toEqual({ message: 'User is deleted' });
 			});
 
 			it('responds with 500 if user is not verified', async () => {
@@ -773,7 +765,7 @@ describe('/auth', () => {
 				const res = await request(app).post('/auth/reset-password').send(data);
 
 				expect(res.status).toBe(500);
-				expect(res.body).toEqual({ message: 'Failed to update user record' });
+				expect(res.body).toEqual({ message: 'User is deleted' });
 			});
 
 			it('responds with 500 with token with unverified user', async () => {
@@ -916,7 +908,7 @@ describe('/auth', () => {
 				const res = await request(app).post('/auth/change-password').send(data);
 
 				expect(res.status).toBe(500);
-				expect(res.body).toEqual({ message: 'Failed to update user record' });
+				expect(res.body).toEqual({ message: 'User is deleted' });
 			});
 
 			it('responds with 500 when user is unverified', async () => {

@@ -193,8 +193,11 @@ export async function login(
 	const user = users.find(u => u.email === email);
 
 	// Throw if email isn't matched
-	if (user === undefined || user.deleted)
+	if (user === undefined)
 		throw new HttpException(401, 'Could not find user with matching email');
+
+	// Throw if user is deleted
+	if (user.deleted) throw new HttpException(401, 'User is deleted');
 
 	// Throw if user is unverified
 	if (!user.verified) throw new HttpException(401, 'User not verified');
@@ -230,8 +233,11 @@ export async function loginWithRefreshToken(
 	const user = users.find(u => u.email === email);
 
 	// Throw if email isn't matched
-	if (user === undefined || user.deleted)
+	if (user === undefined)
 		throw new HttpException(401, 'Could not find user with matching email');
+
+	// Throw if user is deleted
+	if (user.deleted) throw new HttpException(401, 'User is deleted');
 
 	// Throw if user is unverified
 	if (!user.verified) throw new HttpException(401, 'User not verified');
@@ -305,8 +311,10 @@ export async function deleteAccount(accountId: number): Promise<void> {
 	const user = users.find(u => u.id === accountId);
 
 	// Throw if user is not found
-	if (user === undefined || user.deleted)
-		throw new HttpException(500, 'User does not exist');
+	if (user === undefined) throw new HttpException(500, 'User does not exist');
+
+	// Throw if user is deleted
+	if (user.deleted) throw new HttpException(500, 'User is deleted');
 
 	// Throw if user is unverified
 	if (!user.verified) throw new HttpException(500, 'User not verified');
@@ -335,8 +343,11 @@ export async function verifyAccount(token: string): Promise<void> {
 	const user = users.find(u => u.id === verificationToken.userId);
 
 	// Throw if user not found
-	if (user === undefined || user.deleted)
+	if (user === undefined)
 		throw new HttpException(500, 'Failed to update user record');
+
+	// Throw if user is deleted
+	if (user.deleted) throw new HttpException(500, 'User is deleted');
 
 	// Throw if user is already verified
 	if (user.verified) throw new HttpException(500, 'User already verified');
@@ -357,8 +368,11 @@ export async function resendVerification(email: string): Promise<void> {
 	const user = users.find(u => u.email === email);
 
 	// Throw if email isn't matched
-	if (user === undefined || user.deleted)
+	if (user === undefined)
 		throw new HttpException(500, 'Could not find user with matching email');
+
+	// Throw if user is deleted
+	if (user.deleted) throw new HttpException(500, 'User is deleted');
 
 	// Throw if user is already verified
 	if (user.verified) throw new HttpException(500, 'User already verified');
@@ -382,8 +396,11 @@ export async function sendForgotPasswordToken(email: string): Promise<void> {
 	const user = users.find(u => u.email === email);
 
 	// Throw if email isn't matched
-	if (user === undefined || user.deleted)
+	if (user === undefined)
 		throw new HttpException(500, 'Could not find user with matching email');
+
+	// Throw if user is deleted
+	if (user.deleted) throw new HttpException(500, 'User is deleted');
 
 	// Throw if user is not verified
 	if (!user.verified) throw new HttpException(500, 'User not verified');
@@ -422,8 +439,11 @@ export async function resetPassword(
 	const user = users.find(u => u.id === forgotPasswordToken.userId);
 
 	// Throw if user not found
-	if (user === undefined || user.deleted)
+	if (user === undefined)
 		throw new HttpException(500, 'Failed to update user record');
+
+	// Throw if user is deleted
+	if (user.deleted) throw new HttpException(500, 'User is deleted');
 
 	// Throw if user is not verified
 	if (!user.verified) throw new HttpException(500, 'User not verified');
@@ -453,8 +473,11 @@ export async function changePassword(
 	const user = users.find(u => u.id === accountId);
 
 	// Throw if user not found
-	if (user === undefined || user.deleted)
+	if (user === undefined)
 		throw new HttpException(500, 'Failed to update user record');
+
+	// Throw if user is deleted
+	if (user.deleted) throw new HttpException(500, 'User is deleted');
 
 	// Throw if user is not verified
 	if (!user.verified) throw new HttpException(500, 'User not verified');
