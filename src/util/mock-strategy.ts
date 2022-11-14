@@ -47,15 +47,15 @@ export class MockStrategy extends Strategy {
 		if (this.user === undefined) return this.pass();
 
 		// Successful authentication if no verify method is given
-		if (!this.verify) return this.success(this.user);
+		if (this.verify === undefined) return this.success(this.user);
 
 		// Callback for verify method to call
 		const verified: DoneCallback = (error, user, info) => {
 			// Authentication error if an error is given
-			if (error) return this.error(error);
+			if (error !== undefined) return this.error(error);
 
 			// Authentication failure if user is falsy
-			if (!user) return this.fail(info);
+			if (user === undefined) return this.fail(info);
 
 			// Successful authentication
 			this.success(user, info);
