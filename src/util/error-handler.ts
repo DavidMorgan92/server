@@ -23,8 +23,11 @@ export default function errorHandler(
 
 	// If it is a RateLimitException
 	if (error instanceof RateLimitException) {
-		// Set Retry-After header to number of seconds to wait and respond with 429
-		res.set('Retry-After', String(error.retrySeconds));
+		// Set rate limit headers and respond with 429
+		res.set('Retry-After', String(error.msBeforeNext / 1000));
+		res.set('X-RateLimit-Limit', String(error.points));
+		res.set('X-RateLimit-Remaining', String(error.remainingPoints));
+		res.set('X-RateLimit-Reset', error.resetTime.toISOString());
 		res.sendStatus(429);
 		return;
 	}
