@@ -4,6 +4,7 @@ import { MockStrategy, DoneCallback } from '../../util/mock-strategy';
 import app from '../../server';
 
 jest.mock('../../services/auth-service');
+jest.mock('../../util/rate-limiter');
 
 describe('/auth', () => {
 	describe('/login', () => {

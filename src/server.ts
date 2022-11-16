@@ -31,7 +31,7 @@ configurePassport(passport);
 app.use(passport.initialize());
 
 // Use global rate limiter
-if (process.env.NODE_ENV !== 'test') initRateLimiter(app);
+initRateLimiter(app);
 
 // Connect routers
 app.use('/auth', auth);
