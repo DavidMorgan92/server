@@ -20,14 +20,18 @@ if (process.env.GLOBAL_RATE_LIMIT_BLOCK_DURATION_SECONDS === undefined)
 	);
 
 // Load environment variables for global rate limiter parameters
-const points = Number(process.env.GLOBAL_RATE_LIMIT_POINTS);
-const duration = Number(process.env.GLOBAL_RATE_LIMIT_DURATION_SECONDS);
-const blockDuration = Number(
+const globalPoints = Number(process.env.GLOBAL_RATE_LIMIT_POINTS);
+const globalDuration = Number(process.env.GLOBAL_RATE_LIMIT_DURATION_SECONDS);
+const globalBlockDuration = Number(
 	process.env.GLOBAL_RATE_LIMIT_BLOCK_DURATION_SECONDS,
 );
 
 /** Global rate limiter for DoS protection */
-const rateLimiter = new RateLimiterMemory({ points, duration, blockDuration });
+const globalRateLimiter = new RateLimiterMemory({
+	points: globalPoints,
+	duration: globalDuration,
+	blockDuration: globalBlockDuration,
+});
 
 /**
  * Express middleware for global rate limiter
@@ -35,14 +39,14 @@ const rateLimiter = new RateLimiterMemory({ points, duration, blockDuration });
  * @param _res Response
  * @param next Next function
  */
-async function rateLimiterMiddleware(
+async function globalRateLimiterMiddleware(
 	req: Request,
 	_res: Response,
 	next: NextFunction,
 ): Promise<void> {
 	try {
 		// Consume a point for the request's IP
-		await rateLimiter.consume(req.ip);
+		await globalRateLimiter.consume(req.ip);
 
 		// Call the next function
 		next();
@@ -51,7 +55,7 @@ async function rateLimiterMiddleware(
 		if (error instanceof RateLimiterRes)
 			throw new RateLimitException(
 				error.msBeforeNext,
-				rateLimiter.points,
+				globalRateLimiter.points,
 				error.remainingPoints,
 			);
 
@@ -64,6 +68,6 @@ async function rateLimiterMiddleware(
  * Use the global rate limiter middleware
  * @param app The express application
  */
-export function initRateLimiter(app: Application) {
-	app.use(expressAsyncHandler(rateLimiterMiddleware));
+export function initGlobalRateLimiter(app: Application): void {
+	app.use(expressAsyncHandler(globalRateLimiterMiddleware));
 }

@@ -1,19 +1,22 @@
 import request from 'supertest';
 import express from 'express';
-import { initRateLimiter } from '../rate-limiter';
+import { initGlobalRateLimiter } from '../rate-limiter';
 
 describe('app global rate limiter', () => {
-	it('throws if rate limit is exceeded', async () => {
+	it('responds with 500 if rate limit is exceeded', async () => {
+		// Create an express app with the global rate limiter middleware
 		const app = express();
-		initRateLimiter(app);
+		initGlobalRateLimiter(app);
 		app.get('/', (_req, res) => res.sendStatus(200));
 
-		for (let i = 0; i < Number(process.env.GLOBAL_RATE_LIMIT_POINTS); ++i)
-			await request(app).get('/');
+		// Execute as many requests as are allowed, expect them to succeed
+		for (let i = 0; i < Number(process.env.GLOBAL_RATE_LIMIT_POINTS); ++i) {
+			const res = await request(app).get('/');
+			expect(res.status).toBe(200);
+		}
 
+		// Execute one more request, expect it to fail
 		const res = await request(app).get('/');
-
 		expect(res.status).toBe(500);
 	});
 });
-

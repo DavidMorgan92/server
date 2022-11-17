@@ -5,7 +5,7 @@ import cors from 'cors';
 import passport from 'passport';
 import errorHandler from './util/error-handler';
 import configurePassport from './util/configure-passport';
-import { initRateLimiter } from './util/rate-limiter';
+import { initGlobalRateLimiter } from './util/rate-limiter';
 import auth from './routes/auth';
 
 // Create Express app
@@ -31,7 +31,7 @@ configurePassport(passport);
 app.use(passport.initialize());
 
 // Use global rate limiter
-initRateLimiter(app);
+initGlobalRateLimiter(app);
 
 // Connect routers
 app.use('/auth', auth);
