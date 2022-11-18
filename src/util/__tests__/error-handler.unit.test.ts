@@ -111,4 +111,3 @@ describe('errorHandler', () => {
 		expect(res.set).not.toHaveBeenCalled();
 	});
 });
-

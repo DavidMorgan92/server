@@ -10,7 +10,11 @@ export interface MockStrategyOptions {
 }
 
 /** Callback for verify function to call to indicate verification status */
-export type DoneCallback = (error?: Error, user?: Express.User, info?: any) => void;
+export type DoneCallback = (
+	error?: Error,
+	user?: Express.User,
+	info?: any,
+) => void;
 
 /** Function called by MockStrategy to verify the user */
 export type VerifyFunction = (user: Express.User, done: DoneCallback) => void;
@@ -68,4 +72,3 @@ export class MockStrategy extends Strategy {
 		}
 	}
 }
-

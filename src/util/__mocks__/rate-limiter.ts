@@ -20,4 +20,3 @@ async function globalRateLimiterMiddleware(
 export function initGlobalRateLimiter(app: Application): void {
 	app.use(expressAsyncHandler(globalRateLimiterMiddleware));
 }
-
