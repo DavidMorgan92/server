@@ -10,9 +10,9 @@ import RateLimitException from '../exceptions/rate-limit-exception';
  */
 export default function errorHandler(
 	error: any,
-	_req: Request,
+	_req: Request | undefined,
 	res: Response,
-	_next: NextFunction,
+	_next: NextFunction | undefined,
 ): void {
 	// If it is a ZodError
 	if (error instanceof ZodError) {
